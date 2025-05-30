@@ -5,7 +5,6 @@ import React, { useState, useEffect } from 'react';
 interface RecordButtonProps {
   isRecording: boolean;
   isProcessing: boolean;
-  ttsStatus: string;
   onClick: () => void;
 }
 
@@ -16,10 +15,9 @@ interface RecordButtonProps {
 const RecordButton: React.FC<RecordButtonProps> = ({
   isRecording,
   isProcessing,
-  ttsStatus,
   onClick
 }) => {
-  const isDisabled = isProcessing || ttsStatus === 'playing';
+  const isDisabled = isProcessing;
   const [isPressed, setIsPressed] = useState(false);
   const [showRipple, setShowRipple] = useState(false);
 
@@ -60,57 +58,80 @@ const RecordButton: React.FC<RecordButtonProps> = ({
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, [onClick]);
+  }, [onClick, isDisabled]);
 
   return (
-    <div className="mb-8 flex flex-col items-center relative">
-      {/* 录音状态下的波纹动画 */}
-      {isRecording && (
-        <>
-          <div className={`absolute w-16 h-16 rounded-full bg-red-500 opacity-0 ${showRipple ? 'animate-ripple' : ''}`}></div>
-          <div className="absolute w-16 h-16 rounded-full bg-red-500 opacity-0 animate-ripple-delay"></div>
-          <div className="absolute w-16 h-16 rounded-full bg-red-500 opacity-0 animate-ripple-delay-long"></div>
-        </>
-      )}
-      
+    <div className="relative flex flex-col items-center space-y-4">
+      {/* 录音按钮 */}
       <button
         onClick={onClick}
         onMouseDown={() => setIsPressed(true)}
         onMouseUp={() => setIsPressed(false)}
-        onMouseLeave={() => isPressed && setIsPressed(false)}
-        onTouchStart={() => setIsPressed(true)}
-        onTouchEnd={() => setIsPressed(false)}
+        onMouseLeave={() => setIsPressed(false)}
         disabled={isDisabled}
         className={`
-          w-16 h-16 rounded-full 
-          flex items-center justify-center 
-          shadow-lg 
-          transition-all duration-300 ease-in-out
-          ${isPressed ? 'scale-90' : 'scale-100'}
-          ${isRecording 
-            ? 'bg-gradient-to-br from-red-400 to-red-600 border-2 border-red-300' 
-            : 'bg-gradient-to-br from-blue-400 to-blue-600 border-2 border-blue-300 hover:from-blue-300 hover:to-blue-500'
-          } 
-          ${isDisabled ? 'opacity-50 cursor-not-allowed' : 'hover:shadow-xl'}
+          relative w-24 h-24 rounded-full flex items-center justify-center
+          transition-all duration-300 transform
+          ${isRecording
+            ? 'bg-red-500 scale-110 shadow-lg shadow-red-500/50'
+            : isDisabled
+            ? 'bg-gray-400 cursor-not-allowed'
+            : 'bg-blue-500 hover:bg-blue-600 hover:scale-105 active:scale-95'
+          }
+          ${isPressed && !isDisabled ? 'scale-95' : ''}
+          shadow-lg
         `}
       >
-        <svg 
-          xmlns="http://www.w3.org/2000/svg" 
-          fill="none" 
-          viewBox="0 0 24 24" 
-          strokeWidth={1.5} 
-          stroke="currentColor" 
-          className={`w-8 h-8 text-white transition-transform duration-300 ${isRecording ? 'scale-110' : ''}`}
+        {/* 波纹效果 */}
+        {(isRecording && showRipple) && (
+          <div className="absolute inset-0 rounded-full bg-red-400 animate-ping opacity-40" />
+        )}
+        
+        {/* 麦克风图标 */}
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+          strokeWidth={2}
+          stroke="currentColor"
+          className={`w-8 h-8 text-white transition-transform duration-300 ${
+            isRecording ? 'scale-110' : ''
+          }`}
         >
-          <path 
-            strokeLinecap="round" 
-            strokeLinejoin="round" 
-            d={isRecording 
-              ? "M5.25 7.5A2.25 2.25 0 017.5 5.25h9a2.25 2.25 0 012.25 2.25v9a2.25 2.25 0 01-2.25 2.25h-9a2.25 2.25 0 01-2.25-2.25v-9z" 
-              : "M12 18.75a6 6 0 006-6v-1.5m-6 7.5a6 6 0 01-6-6v-1.5m6 7.5v3.75m-3.75 0h7.5M12 15.75a3 3 0 01-3-3V4.5a3 3 0 116 0v8.25a3 3 0 01-3 3z"}
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            d="M12 2a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"
+          />
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            d="M19 10v1a7 7 0 0 1-14 0v-1M12 19v4M8 23h8"
           />
         </svg>
+        
+        {/* 处理中的旋转指示器 */}
+        {isProcessing && (
+          <div className="absolute inset-0 rounded-full border-2 border-white border-t-transparent animate-spin" />
+        )}
       </button>
+
+      {/* 按钮说明文字 */}
+      <div className="text-center space-y-1">
+        <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
+          {isRecording
+            ? 'Recording... Click to stop'
+            : isProcessing
+            ? 'Processing...'
+            : 'Click or press Space to record'
+          }
+        </p>
+        {!isRecording && !isProcessing && (
+          <p className="text-xs text-gray-500 dark:text-gray-400">
+            Hold and speak, then release
+          </p>
+        )}
+      </div>
     </div>
   );
 };

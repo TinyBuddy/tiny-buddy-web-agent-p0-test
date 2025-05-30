@@ -16,9 +16,9 @@ interface ChatHistoryProps {
     temperature: number;
     top_p: number;
     model: string;
-    voiceId: string;
+    userBio?: string;
   };
-  onUpdateAiSettings: (settings: { temperature: number; top_p: number; model: string; voiceId: string }) => void;
+  onUpdateAiSettings: (settings: { temperature: number; top_p: number; model: string; userBio?: string }) => void;
 }
 
 /**
@@ -110,7 +110,9 @@ const ChatHistory: React.FC<ChatHistoryProps> = ({
   };
 
   return (
-    <div className="fixed right-0 top-0 bottom-0 w-1/3 min-w-[320px] max-w-[480px] bg-white dark:bg-gray-800 shadow-lg overflow-y-auto z-40 border-l border-gray-200 dark:border-gray-700 hidden md:block">
+    <div className="bg-white dark:bg-gray-800 shadow-lg overflow-y-auto z-40 border border-gray-200 dark:border-gray-700 
+                   md:fixed md:right-0 md:top-0 md:bottom-0 md:w-1/3 md:min-w-[320px] md:max-w-[480px] md:border-l
+                   rounded-lg md:rounded-none">
       <div className="p-3 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 sticky top-0 z-10">
         <div className="flex justify-between items-center mb-2">
           <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300">Chat History</h3>

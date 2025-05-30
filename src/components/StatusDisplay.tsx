@@ -8,8 +8,6 @@ interface StatusDisplayProps {
   isRecording: boolean;
   isTranscribing: boolean;
   isProcessing: boolean;
-  ttsStatus: string;
-  isPlayingMusic?: boolean;
 }
 
 /**
@@ -21,22 +19,17 @@ const StatusDisplay: React.FC<StatusDisplayProps> = ({
   isRecording,
   isTranscribing,
   isProcessing,
-  ttsStatus,
-  isPlayingMusic = false
 }) => {
   // 根据当前状态确定文本颜色
   const getTextColorClass = () => {
     if (isRecording) return 'text-red-500';
     if (isTranscribing) return 'text-yellow-500';
     if (isProcessing) return 'text-blue-500';
-    if (ttsStatus === 'loading') return 'text-purple-500';
-    if (ttsStatus === 'playing') return 'text-green-500';
-    if (isPlayingMusic) return 'text-indigo-500';
     return 'text-gray-600 dark:text-gray-400';
   };
   
   // 是否显示加载指示器
-  const showLoadingIndicator = isTranscribing || isProcessing || ttsStatus === 'loading';
+  const showLoadingIndicator = isTranscribing || isProcessing;
   
   return (
     <div className="flex-1 flex flex-col items-center justify-center">

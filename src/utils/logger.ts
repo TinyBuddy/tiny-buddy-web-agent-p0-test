@@ -1,46 +1,52 @@
 /**
- * 简单的日志工具类
+ * 简单的日志记录工具
  */
-export class Logger {
-  private prefix: string;
+
+type LogLevel = 'debug' | 'info' | 'warn' | 'error';
+
+class Logger {
+  private readonly tag: string;
   
-  constructor(prefix: string) {
-    this.prefix = prefix;
+  constructor(tag: string) {
+    this.tag = tag;
   }
-
-  /**
-   * 输出信息日志
-   */
-  i(message: string, ...args: any[]) {
-    console.info(`[${this.prefix}] [INFO] ${message}`, ...args);
+  
+  private log(level: LogLevel, message: string, ...args: any[]) {
+    const timestamp = new Date().toISOString();
+    const logMessage = `[${timestamp}] [${this.tag}] [${level.toUpperCase()}] ${message}`;
+    
+    switch (level) {
+      case 'debug':
+        console.debug(logMessage, ...args);
+        break;
+      case 'info':
+        console.info(logMessage, ...args);
+        break;
+      case 'warn':
+        console.warn(logMessage, ...args);
+        break;
+      case 'error':
+        console.error(logMessage, ...args);
+        break;
+    }
   }
-
-  /**
-   * 输出调试日志
-   */
+  
   d(message: string, ...args: any[]) {
-    console.debug(`[${this.prefix}] [DEBUG] ${message}`, ...args);
+    this.log('debug', message, ...args);
   }
-
-  /**
-   * 输出警告日志
-   */
+  
+  i(message: string, ...args: any[]) {
+    this.log('info', message, ...args);
+  }
+  
   w(message: string, ...args: any[]) {
-    console.warn(`[${this.prefix}] [WARN] ${message}`, ...args);
+    this.log('warn', message, ...args);
   }
-
-  /**
-   * 输出错误日志
-   */
-  e(message: string, error?: any) {
-    console.error(`[${this.prefix}] [ERROR] ${message}`, error || '');
+  
+  e(message: string, ...args: any[]) {
+    this.log('error', message, ...args);
   }
 }
-
-/**
- * TTS 专用日志记录器
- */
-export const TtsLogger = new Logger('TTS');
 
 /**
  * ASR 专用日志记录器
@@ -48,6 +54,6 @@ export const TtsLogger = new Logger('TTS');
 export const AsrLogger = new Logger('ASR');
 
 /**
- * Chat 专用日志记录器
+ * 聊天专用日志记录器  
  */
 export const ChatLogger = new Logger('CHAT');
