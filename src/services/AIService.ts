@@ -12,8 +12,10 @@ export class AIService {
   private readonly _axios: AxiosInstance;
 
   // API 密钥直接在类中设置
+  // gitignore-secret: 这里的内容不是真正的密钥
   private readonly _openAIApiKey: string =
     "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"; // 填写您的 OpenAI API 密钥
+  // gitignore-secret: 这里的内容不是真正的密钥
   private readonly _openRouterApiKey: string =
     "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"; // 填写您的 OpenRouter API 密钥
 
@@ -180,7 +182,9 @@ export class AIService {
     // };
 
     const data: any = {
-      user_input : processedMessages.findLast((message) => message.role === "user")?.content,
+      user_input: processedMessages.findLast(
+        (message) => message.role === "user"
+      )?.content,
     };
 
     // 如果提供了用户Bio，添加到prompt_context中
@@ -213,7 +217,7 @@ export class AIService {
       }
 
       const responseData = await response.json();
-      
+
       // 提取AI响应内容
       if (responseData.choices && responseData.choices.length > 0) {
         const content = responseData.choices[0].message?.content || "";
