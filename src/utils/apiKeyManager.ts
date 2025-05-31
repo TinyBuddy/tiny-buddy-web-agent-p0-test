@@ -86,7 +86,6 @@ export function updateOpenAIApiKey(apiKey: string): boolean {
     } else {
       // 如果API Key为空，则删除
       safeLocalStorage.removeItem(OPENAI_API_KEY);
-      globalApiKey = null;
       console.log('[ApiKeyManager] API Key已清除');
     }
 
