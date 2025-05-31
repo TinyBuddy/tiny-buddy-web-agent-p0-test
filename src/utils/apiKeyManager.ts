@@ -51,7 +51,7 @@ const safeLocalStorage = {
 export function getOpenAIApiKey(forceRefresh: boolean = true): string {
   // 在服务端返回空字符串
   if (typeof window === 'undefined') {
-    return process.env.OPENAI_KEY;
+    return process.env.OPENAI_KEY!;
   }
 
   // 如果不强制刷新且已有全局API Key，直接返回
