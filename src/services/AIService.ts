@@ -134,6 +134,7 @@ export class AIService {
       }
     } catch (e: unknown) {
       AsrLogger.e("转写音频失败", e);
+      console.error("apiKey", apiKey);
       if (axios.isAxiosError(e) && e.response) {
         throw new Error(
           `API 请求失败: ${e.response.status} - ${JSON.stringify(
