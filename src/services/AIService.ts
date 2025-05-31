@@ -37,7 +37,7 @@ export class AIService {
     
     if (typeof window === 'undefined') {
       // 在服务端，如果没有提供API Key则返回空字符串
-      return process.env.OPENAI_KEY;
+      return process.env.OPENAI_KEY!;
     }
     
     try {
