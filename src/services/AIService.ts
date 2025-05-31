@@ -1,9 +1,9 @@
 import { DEFAULT_AI_MODEL } from "@/constants/ai";
-import { Message } from '@/types/chat';
-import { AsrLogger, ChatLogger } from '@/utils/logger';
-import axios, { AxiosInstance } from 'axios';
-import FormData from 'form-data';
-import fs from 'fs';
+import { Message } from "@/types/chat";
+import { AsrLogger, ChatLogger } from "@/utils/logger";
+import axios, { AxiosInstance } from "axios";
+import FormData from "form-data";
+import fs from "fs";
 
 /**
  * AI 服务类，用于处理与各种 AI API 的交互，包括 OpenAI 的 ASR 和聊天功能
@@ -34,19 +34,19 @@ export class AIService {
     if (providedApiKey) {
       return providedApiKey;
     }
-    
-    if (typeof window === 'undefined') {
+
+    if (typeof window === "undefined") {
       // 在服务端，如果没有提供API Key则返回空字符串
       return process.env.OPENAI_KEY!;
     }
-    
+
     try {
       // 在客户端，动态导入apiKeyManager
-      const { getOpenAIApiKey } = await import('@/utils/apiKeyManager');
+      const { getOpenAIApiKey } = await import("@/utils/apiKeyManager");
       return getOpenAIApiKey();
     } catch (error) {
-      console.error('Failed to import apiKeyManager:', error);
-      return '';
+      console.error("Failed to import apiKeyManager:", error);
+      return "";
     }
   }
 
@@ -81,11 +81,7 @@ export class AIService {
     lastSentence?: string,
     providedApiKey?: string
   ): Promise<string> {
-    if (!(await this.isOpenAIApiKeySet(providedApiKey))) {
-      throw new Error("OpenAI API 密钥未设置，请先设置 API 密钥");
-    }
-
-    const apiKey = await this.getOpenAIApiKey(providedApiKey);
+    const apiKey = process.env.OPENAI_KEY!;
 
     if (!fs.existsSync(audioFilePath)) {
       throw new Error("音频文件不存在");
