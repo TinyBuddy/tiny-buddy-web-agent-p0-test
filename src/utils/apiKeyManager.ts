@@ -9,7 +9,7 @@
 const OPENAI_API_KEY = 'tiny_buddy_openai_api_key';
 
 // 全局变量
-let globalApiKey: string | null = process.env.OPENAI_KEY;
+let globalApiKey: string = process.env.OPENAI_KEY;
 
 /**
  * 安全访问localStorage的工具函数
