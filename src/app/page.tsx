@@ -1,17 +1,17 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
-import { Message } from '@/types/chat';
-import useChatState from '@/hooks/useChatState';
-import useAudioRecorder from '@/hooks/useAudioRecorder';
-import RecordButton from '@/components/RecordButton';
-import StatusDisplay from '@/components/StatusDisplay';
-import ChatHistory from '@/components/ChatHistory';
-import PerformanceMetrics from '@/components/PerformanceMetrics';
-import { getUserId } from '@/utils/userIdManager';
-import { getUserHost } from '@/utils/hostManager';
-import { getOpenAIApiKey } from '@/utils/apiKeyManager';
-import { isMobile } from '@/utils/platform';
+import React, { useState, useEffect } from "react";
+import { Message } from "@/types/chat";
+import useChatState from "@/hooks/useChatState";
+import useAudioRecorder from "@/hooks/useAudioRecorder";
+import RecordButton from "@/components/RecordButton";
+import StatusDisplay from "@/components/StatusDisplay";
+import ChatHistory from "@/components/ChatHistory";
+import PerformanceMetrics from "@/components/PerformanceMetrics";
+import { getUserId } from "@/utils/userIdManager";
+import { getUserHost } from "@/utils/hostManager";
+import { getOpenAIApiKey } from "@/utils/apiKeyManager";
+import { isMobile } from "@/utils/platform";
 
 interface PerformanceMetrics {
   asrTime: number;
@@ -25,7 +25,7 @@ interface PerformanceMetrics {
 export default function Home() {
   // ASR 状态
   const [isTranscribing, setIsTranscribing] = useState(false);
-  const [transcription, setTranscription] = useState('');
+  const [transcription, setTranscription] = useState("");
 
   // 性能指标
   const [metrics, setMetrics] = useState<PerformanceMetrics>({
@@ -37,8 +37,8 @@ export default function Home() {
   const [aiSettings, setAiSettings] = useState({
     temperature: 1.0,
     top_p: 0.7,
-    model: 'anthropic/claude-3.5-sonnet-20241022',
-    userBio: '' as string | undefined,
+    model: "anthropic/claude-3.5-sonnet-20241022",
+    userBio: "" as string | undefined,
   });
 
   // 显示状态
@@ -47,15 +47,15 @@ export default function Home() {
   const [isOnMobile, setIsOnMobile] = useState(false);
 
   // 用户ID和API Host状态
-  const [currentUserId, setCurrentUserId] = useState<string>('');
-  const [currentHost, setCurrentHost] = useState<string>('');
+  const [currentUserId, setCurrentUserId] = useState<string>("");
+  const [currentHost, setCurrentHost] = useState<string>("");
 
   // 录音器
   const recorder = useAudioRecorder({
     onRecordingComplete: handleRecordingComplete,
     onRecordingError: (error) => {
-      console.error('录音出错:', error);
-      setStatusText('Recording failed. Try again.');
+      console.error("录音出错:", error);
+      setStatusText("Recording failed. Try again.");
       setIsTranscribing(false);
     },
   });
@@ -126,11 +126,13 @@ export default function Home() {
     const asrStartTime = performance.now();
 
     try {
-      const lastAssistantMessage = messages.findLast((message) => message.role === "assistant");
+      const lastAssistantMessage = messages.findLast(
+        (message) => message.role === "assistant"
+      );
       const lastAssistantMessageContent = lastAssistantMessage?.content;
 
       // 获取API Key
-      const apiKey = getOpenAIApiKey();
+      const apiKey = getOpenAIApiKey() || process.env.OPENAI_KEY!;
       if (!apiKey) {
         throw new Error("OpenAI API Key未设置，请先在设置中配置API Key");
       }
@@ -187,7 +189,7 @@ export default function Home() {
   async function processUserMessage(userMessage: string) {
     setIsProcessing(true);
     setStatusText("Processing...");
-    let uuid = self.crypto.randomUUID();
+    const uuid = self.crypto.randomUUID();
     // 开始计时AI请求时间
     const aiStartTime = performance.now();
 
@@ -196,7 +198,7 @@ export default function Home() {
       const chatMessages: Message[] = [
         ...messages,
         // 新的用户消息
-        {role: "user", content: userMessage ,id : uuid},
+        { role: "user", content: userMessage, id: uuid },
       ];
 
       // 清空当前助手消息
@@ -210,7 +212,7 @@ export default function Home() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ 
+        body: JSON.stringify({
           messages: chatMessages,
           aiSettings: aiSettings,
           userId: userId, // 获取最新的用户ID并传递给API
@@ -233,7 +235,7 @@ export default function Home() {
       }
 
       const data = await response.json();
-      
+
       if (data.success && data.message) {
         // 更新助手消息
         updateCurrentAssistantMessage(data.message);
@@ -277,12 +279,17 @@ export default function Home() {
   /**
    * 更新AI设置
    */
-  const handleUpdateAiSettings = (newSettings: { temperature: number; top_p: number; model: string; userBio?: string }) => {
+  const handleUpdateAiSettings = (newSettings: {
+    temperature: number;
+    top_p: number;
+    model: string;
+    userBio?: string;
+  }) => {
     setAiSettings({
       temperature: newSettings.temperature,
       top_p: newSettings.top_p,
       model: newSettings.model,
-      userBio: newSettings.userBio || '',
+      userBio: newSettings.userBio || "",
     });
   };
 
@@ -314,32 +321,32 @@ export default function Home() {
                   onClick={handleTogglePerformance}
                   className="px-3 py-1 text-sm bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
                 >
-                  {showPerformance ? 'Hide' : 'Show'} Metrics
+                  {showPerformance ? "Hide" : "Show"} Metrics
                 </button>
                 <button
                   onClick={handleToggleChatHistory}
                   className="px-3 py-1 text-sm bg-green-500 text-white rounded hover:bg-green-600 transition-colors"
                 >
-                  {showChatHistory ? 'Hide' : 'Show'} Chat
+                  {showChatHistory ? "Hide" : "Show"} Chat
                 </button>
               </div>
             </div>
           </div>
-          
+
           <main className="pt-20 pb-4 px-4">
             {showPerformance && (
               <div className="mb-4">
-                <PerformanceMetrics 
+                <PerformanceMetrics
                   metrics={{
                     asrTime: metrics.asrTime,
                     aiRequestTime: metrics.aiRequestTime,
-                    ttsTime: 0
+                    ttsTime: 0,
                   }}
                   formatTime={(time: number) => `${Math.round(time)}ms`}
                 />
               </div>
             )}
-            
+
             {showChatHistory && (
               <div className="mb-4 max-h-80 overflow-y-auto bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700">
                 <ChatHistory
@@ -353,7 +360,7 @@ export default function Home() {
                 />
               </div>
             )}
-            
+
             <div className="flex-1 flex flex-col items-center justify-center w-full">
               {/* 状态显示 */}
               <StatusDisplay
@@ -362,11 +369,11 @@ export default function Home() {
                 isTranscribing={isTranscribing}
                 isProcessing={isProcessing}
               />
-              
+
               <p className="text-green-500 dark:text-gray-400 py-2 text-sm text-center mb-4">
-               {currentUserId || 'Loading...'} {currentHost || 'Loading...'}
+                {currentUserId || "Loading..."} {currentHost || "Loading..."}
               </p>
-              
+
               {/* 录音按钮 */}
               <RecordButton
                 isRecording={recorder.isRecording}
@@ -383,11 +390,11 @@ export default function Home() {
           {/* 侧边栏组件 - 性能指标 */}
           {showPerformance && (
             <div className="fixed top-4 left-4 z-30">
-              <PerformanceMetrics 
+              <PerformanceMetrics
                 metrics={{
                   asrTime: metrics.asrTime,
                   aiRequestTime: metrics.aiRequestTime,
-                  ttsTime: 0
+                  ttsTime: 0,
                 }}
                 formatTime={(time: number) => `${Math.round(time)}ms`}
               />
@@ -397,9 +404,9 @@ export default function Home() {
           {/* 侧边栏组件 - 聊天历史 */}
           {showChatHistory && (
             <div className="fixed top-0 right-0 h-full w-64 z-20">
-              <ChatHistory 
-                messages={messages} 
-                onClear={handleClear} 
+              <ChatHistory
+                messages={messages}
+                onClear={handleClear}
                 onTogglePerformance={handleTogglePerformance}
                 showPerformance={showPerformance}
                 onToggleChatHistory={handleToggleChatHistory}
@@ -411,7 +418,11 @@ export default function Home() {
 
           {/* 主内容区域 */}
           <main className="flex-1 flex items-center justify-center min-h-screen">
-            <div className={`flex-1 flex flex-col items-center justify-center w-full ${showChatHistory ? 'md:pr-64' : ''}`}>
+            <div
+              className={`flex-1 flex flex-col items-center justify-center w-full ${
+                showChatHistory ? "md:pr-64" : ""
+              }`}
+            >
               {/* 状态显示 */}
               <StatusDisplay
                 statusText={statusText}
@@ -419,11 +430,11 @@ export default function Home() {
                 isTranscribing={isTranscribing}
                 isProcessing={isProcessing}
               />
-              
+
               <p className="text-green-500 dark:text-gray-400 py-2 text-sm text-center mb-4">
-               {currentUserId || 'Loading...'} {currentHost || 'Loading...'}
+                {currentUserId || "Loading..."} {currentHost || "Loading..."}
               </p>
-              
+
               {/* 录音按钮 */}
               <RecordButton
                 isRecording={recorder.isRecording}
