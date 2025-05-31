@@ -23,6 +23,16 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // 获取API Key from headers
+    const apiKey = request.headers.get('x-openai-api-key');
+    if (!apiKey) {
+      AsrLogger.e('未提供OpenAI API Key');
+      return NextResponse.json(
+        { error: '未提供OpenAI API Key，请在请求头中设置 x-openai-api-key' },
+        { status: 400 }
+      );
+    }
+
     // 获取表单数据
     const formData = await request.formData();
     const audioFile = formData.get('file') as File | null;
@@ -69,8 +79,13 @@ export async function POST(request: NextRequest) {
     // 直接使用原始文件，不进行格式转换
     const finalFilePath = tempFilePath;
 
-    // 调用 AI 服务进行转写
-    const text = await aiService.transcribeAudio(finalFilePath, language || undefined, lastSentence || undefined);
+    // 调用 AI 服务进行转写，传递API Key
+    const text = await aiService.transcribeAudio(
+      finalFilePath, 
+      language || undefined, 
+      lastSentence || undefined,
+      apiKey
+    );
     
     AsrLogger.i('音频转文本成功');
     return NextResponse.json({ text });

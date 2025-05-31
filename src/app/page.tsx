@@ -10,6 +10,7 @@ import ChatHistory from '@/components/ChatHistory';
 import PerformanceMetrics from '@/components/PerformanceMetrics';
 import { getUserId } from '@/utils/userIdManager';
 import { getUserHost } from '@/utils/hostManager';
+import { getOpenAIApiKey } from '@/utils/apiKeyManager';
 import { isMobile } from '@/utils/platform';
 
 interface PerformanceMetrics {
@@ -120,15 +121,19 @@ export default function Home() {
    * 处理录音完成
    */
   async function handleRecordingComplete(blob: Blob) {
-    // 开始计时ASR处理时间
+    setIsTranscribing(true);
+    setStatusText("Processing voice...");
     const asrStartTime = performance.now();
-    try {
-      setIsTranscribing(true);
-      setStatusText("Transcribing...");
 
-      // get the last assistant message from the messages array
+    try {
       const lastAssistantMessage = messages.findLast((message) => message.role === "assistant");
       const lastAssistantMessageContent = lastAssistantMessage?.content;
+
+      // 获取API Key
+      const apiKey = getOpenAIApiKey();
+      if (!apiKey) {
+        throw new Error("OpenAI API Key未设置，请先在设置中配置API Key");
+      }
 
       // 发送音频到语音识别服务
       const formData = new FormData();
@@ -137,6 +142,9 @@ export default function Home() {
 
       const response = await fetch("/api/transcribe", {
         method: "POST",
+        headers: {
+          "x-openai-api-key": apiKey,
+        },
         body: formData,
       });
 

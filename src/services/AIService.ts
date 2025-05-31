@@ -11,9 +11,7 @@ import fs from 'fs';
 export class AIService {
   private readonly _axios: AxiosInstance;
 
-  // API 密钥直接在类中设置
-  private readonly _openAIApiKey: string =
-    "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";
+  // OpenRouter API 密钥
   private readonly _openRouterApiKey: string =
     "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"; // 填写您的 OpenRouter API 密钥
 
@@ -28,10 +26,37 @@ export class AIService {
   }
 
   /**
-   * 检查 OpenAI API 密钥是否已设置
+   * 获取 OpenAI API 密钥
+   * @param providedApiKey 可选的API Key，如果提供则直接使用
+   * @returns OpenAI API 密钥
    */
-  get isOpenAIApiKeySet(): boolean {
-    return this._openAIApiKey.length > 0;
+  private async getOpenAIApiKey(providedApiKey?: string): Promise<string> {
+    if (providedApiKey) {
+      return providedApiKey;
+    }
+    
+    if (typeof window === 'undefined') {
+      // 在服务端，如果没有提供API Key则返回空字符串
+      return '';
+    }
+    
+    try {
+      // 在客户端，动态导入apiKeyManager
+      const { getOpenAIApiKey } = await import('@/utils/apiKeyManager');
+      return getOpenAIApiKey();
+    } catch (error) {
+      console.error('Failed to import apiKeyManager:', error);
+      return '';
+    }
+  }
+
+  /**
+   * 检查 OpenAI API 密钥是否已设置
+   * @param providedApiKey 可选的API Key
+   */
+  async isOpenAIApiKeySet(providedApiKey?: string): Promise<boolean> {
+    const apiKey = await this.getOpenAIApiKey(providedApiKey);
+    return apiKey.length > 0;
   }
 
   /**
@@ -47,16 +72,20 @@ export class AIService {
    * @param audioFilePath - 要转写的音频文件路径
    * @param language - 可选参数，指定音频语言，如果不指定，Whisper 会自动检测
    * @param lastSentence - 可选参数，上一句话的内容，用于提供上下文
+   * @param providedApiKey - 可选参数，提供的API Key，如果不提供则从localStorage获取
    * @returns 转写的文本内容
    */
   async transcribeAudio(
     audioFilePath: string,
     language?: string,
-    lastSentence?: string
+    lastSentence?: string,
+    providedApiKey?: string
   ): Promise<string> {
-    if (!this.isOpenAIApiKeySet) {
+    if (!(await this.isOpenAIApiKeySet(providedApiKey))) {
       throw new Error("OpenAI API 密钥未设置，请先设置 API 密钥");
     }
+
+    const apiKey = await this.getOpenAIApiKey(providedApiKey);
 
     if (!fs.existsSync(audioFilePath)) {
       throw new Error("音频文件不存在");
@@ -89,7 +118,7 @@ export class AIService {
         {
           headers: {
             ...formData.getHeaders(),
-            Authorization: `Bearer ${this._openAIApiKey}`,
+            Authorization: `Bearer ${apiKey}`,
           },
         }
       );
