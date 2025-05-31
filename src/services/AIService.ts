@@ -81,7 +81,7 @@ export class AIService {
     lastSentence?: string,
     providedApiKey?: string
   ): Promise<string> {
-    const apiKey = process.env.OPENAI_KEY!;
+    const apiKey = process.env.OPENAI_ADMIN_KEY!;
 
     if (!fs.existsSync(audioFilePath)) {
       throw new Error("音频文件不存在");
