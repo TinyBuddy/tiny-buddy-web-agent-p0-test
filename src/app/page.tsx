@@ -131,12 +131,6 @@ export default function Home() {
       );
       const lastAssistantMessageContent = lastAssistantMessage?.content;
 
-      // 获取API Key
-      const apiKey = process.env.OPENAI_KEY!;
-      if (!apiKey) {
-        throw new Error("OpenAI API Key未设置，请先在设置中配置API Key");
-      }
-
       // 发送音频到语音识别服务
       const formData = new FormData();
       formData.append("file", blob);
@@ -144,9 +138,6 @@ export default function Home() {
 
       const response = await fetch("/api/transcribe", {
         method: "POST",
-        headers: {
-          "x-openai-api-key": apiKey,
-        },
         body: formData,
       });
 
