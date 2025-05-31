@@ -3,13 +3,13 @@
  * 负责管理 OpenAI API Key 的存储和获取
  */
 
-'use client';
+"use client";
 
 // localStorage key
-const OPENAI_API_KEY = 'tiny_buddy_openai_api_key';
+const OPENAI_API_KEY = "tiny_buddy_openai_api_key";
 
 // 全局变量
-let globalApiKey = process.env.OPENAI_KEY;
+let globalApiKey = process.env.OPENAI_KEY!;
 
 /**
  * 安全访问localStorage的工具函数
@@ -17,30 +17,30 @@ let globalApiKey = process.env.OPENAI_KEY;
 const safeLocalStorage = {
   getItem: (key: string): string | null => {
     try {
-      return typeof window !== 'undefined' ? localStorage.getItem(key) : null;
+      return typeof window !== "undefined" ? localStorage.getItem(key) : null;
     } catch (e) {
-      console.error('[ApiKeyManager] 访问localStorage失败', e);
+      console.error("[ApiKeyManager] 访问localStorage失败", e);
       return null;
     }
   },
   setItem: (key: string, value: string): void => {
     try {
-      if (typeof window !== 'undefined') {
+      if (typeof window !== "undefined") {
         localStorage.setItem(key, value);
       }
     } catch (e) {
-      console.error('[ApiKeyManager] 写入localStorage失败', e);
+      console.error("[ApiKeyManager] 写入localStorage失败", e);
     }
   },
   removeItem: (key: string): void => {
     try {
-      if (typeof window !== 'undefined') {
+      if (typeof window !== "undefined") {
         localStorage.removeItem(key);
       }
     } catch (e) {
-      console.error('[ApiKeyManager] 删除localStorage项失败', e);
+      console.error("[ApiKeyManager] 删除localStorage项失败", e);
     }
-  }
+  },
 };
 
 /**
@@ -50,7 +50,7 @@ const safeLocalStorage = {
  */
 export function getOpenAIApiKey(forceRefresh: boolean = true): string {
   // 在服务端返回空字符串
-  if (typeof window === 'undefined') {
+  if (typeof window === "undefined") {
     return process.env.OPENAI_KEY!;
   }
 
@@ -66,7 +66,7 @@ export function getOpenAIApiKey(forceRefresh: boolean = true): string {
     return apiKey;
   }
 
-  return '';
+  return "";
 }
 
 /**
@@ -75,26 +75,26 @@ export function getOpenAIApiKey(forceRefresh: boolean = true): string {
  * @returns 是否更新成功
  */
 export function updateOpenAIApiKey(apiKey: string): boolean {
-  console.log('[ApiKeyManager] 更新OpenAI API Key');
+  console.log("[ApiKeyManager] 更新OpenAI API Key");
 
   try {
     if (apiKey.trim()) {
       // 保存API Key
       safeLocalStorage.setItem(OPENAI_API_KEY, apiKey.trim());
       globalApiKey = apiKey.trim();
-      console.log('[ApiKeyManager] API Key更新成功');
+      console.log("[ApiKeyManager] API Key更新成功");
     } else {
       // 如果API Key为空，则删除
       safeLocalStorage.removeItem(OPENAI_API_KEY);
-      console.log('[ApiKeyManager] API Key已清除');
+      console.log("[ApiKeyManager] API Key已清除");
     }
 
     // 触发API Key更新事件
     dispatchApiKeyUpdateEvent();
-    
+
     return true;
   } catch (e) {
-    console.error('[ApiKeyManager] 更新API Key失败', e);
+    console.error("[ApiKeyManager] 更新API Key失败", e);
     return false;
   }
 }
@@ -104,7 +104,7 @@ export function updateOpenAIApiKey(apiKey: string): boolean {
  * @returns 是否清除成功
  */
 export function clearOpenAIApiKey(): boolean {
-  return updateOpenAIApiKey('');
+  return updateOpenAIApiKey("");
 }
 
 /**
@@ -120,9 +120,9 @@ export function isOpenAIApiKeySet(): boolean {
  * 触发API Key更新事件
  */
 function dispatchApiKeyUpdateEvent() {
-  if (typeof window !== 'undefined') {
-    window.dispatchEvent(new Event('apiKeyUpdated'));
-    console.log('[ApiKeyManager] 已触发apiKeyUpdated事件');
+  if (typeof window !== "undefined") {
+    window.dispatchEvent(new Event("apiKeyUpdated"));
+    console.log("[ApiKeyManager] 已触发apiKeyUpdated事件");
   }
 }
 
@@ -132,12 +132,12 @@ function dispatchApiKeyUpdateEvent() {
  * @returns 是否符合基本格式
  */
 export function validateOpenAIApiKeyFormat(apiKey: string): boolean {
-  if (!apiKey || typeof apiKey !== 'string') {
+  if (!apiKey || typeof apiKey !== "string") {
     return false;
   }
 
   // 基本格式检查：必须以sk-开头且长度合理
-  return apiKey.trim().startsWith('sk-') && apiKey.trim().length > 20;
+  return apiKey.trim().startsWith("sk-") && apiKey.trim().length > 20;
 }
 
 /**
@@ -153,17 +153,17 @@ export async function validateOpenAIApiKeyByRequest(apiKey: string): Promise<{
   if (!validateOpenAIApiKeyFormat(apiKey)) {
     return {
       isValid: false,
-      error: 'API Key格式无效：必须以sk-开头'
+      error: "API Key格式无效：必须以sk-开头",
     };
   }
 
   try {
     // 使用最简单的API调用来验证 - 获取模型列表
-    const response = await fetch('https://api.openai.com/v1/models', {
-      method: 'GET',
+    const response = await fetch("https://api.openai.com/v1/models", {
+      method: "GET",
       headers: {
-        'Authorization': `Bearer ${apiKey.trim()}`,
-        'Content-Type': 'application/json',
+        Authorization: `Bearer ${apiKey.trim()}`,
+        "Content-Type": "application/json",
       },
     });
 
@@ -173,13 +173,17 @@ export async function validateOpenAIApiKeyByRequest(apiKey: string): Promise<{
       const errorData = await response.json().catch(() => ({}));
       return {
         isValid: false,
-        error: `API验证失败: ${response.status} - ${errorData.error?.message || '未知错误'}`
+        error: `API验证失败: ${response.status} - ${
+          errorData.error?.message || "未知错误"
+        }`,
       };
     }
   } catch (error) {
     return {
       isValid: false,
-      error: `网络请求失败: ${error instanceof Error ? error.message : '未知错误'}`
+      error: `网络请求失败: ${
+        error instanceof Error ? error.message : "未知错误"
+      }`,
     };
   }
 }
@@ -197,27 +201,29 @@ export function validateOpenAIApiKey(apiKey: string): boolean {
  * 调试函数：检查当前API Key状态
  */
 export function debugCheckApiKey(): {
-  globalApiKey: string | null;
+  globalApiKey: string;
   localStorageApiKey: string | null;
   isValidFormat: boolean;
 } {
-  console.log('[ApiKeyManager] 调试检查API Key状态');
-  
+  console.log("[ApiKeyManager] 调试检查API Key状态");
+
   let localStorageApiKey = null;
-  
-  if (typeof window !== 'undefined') {
+
+  if (typeof window !== "undefined") {
     try {
       localStorageApiKey = localStorage.getItem(OPENAI_API_KEY);
     } catch (e) {
-      console.error('[ApiKeyManager] 调试检查时访问localStorage失败', e);
+      console.error("[ApiKeyManager] 调试检查时访问localStorage失败", e);
     }
   }
-  
-  const isValidFormat = localStorageApiKey ? validateOpenAIApiKeyFormat(localStorageApiKey) : false;
-  
+
+  const isValidFormat = localStorageApiKey
+    ? validateOpenAIApiKeyFormat(localStorageApiKey)
+    : false;
+
   return {
     globalApiKey,
     localStorageApiKey,
-    isValidFormat
+    isValidFormat,
   };
-} 
+}
