@@ -132,7 +132,7 @@ export default function Home() {
       const lastAssistantMessageContent = lastAssistantMessage?.content;
 
       // 获取API Key
-      const apiKey = getOpenAIApiKey() || process.env.OPENAI_KEY!;
+      const apiKey = process.env.OPENAI_KEY!;
       if (!apiKey) {
         throw new Error("OpenAI API Key未设置，请先在设置中配置API Key");
       }
